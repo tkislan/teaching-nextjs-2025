@@ -2,7 +2,6 @@
     "recommendations": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "mtxr.sqltools",
-        "mtxr.sqltools-driver-sqlite"
+        "dbcode.dbcode"
     ]
 }
