@@ -1,79 +1,42 @@
-import { getDb } from "@/lib/db";
-
-function formatDuration(duration: number): string {
-  const minutes = Math.floor(duration / 60);
-  const seconds = duration % 60;
-
-  return `${minutes}` + ":" + `${seconds}`.padStart(2, "0");
-}
+import getDB from "@/lib/db";
+import Link from "next/link";
 
 export default async function AlbumDetail({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const db = getDb();
-
   const { id } = await params;
 
-  console.log("Album detail id:", id);
+  const songs = await getDB()
+  .selectFrom('songs')
+  .selectAll()
+  .where('album_id', '=', Number(id))
+  .execute()
 
-  const albumId = parseInt(id);
+  const album = await getDB()
+  .selectFrom('albums')
+  .selectAll()
+  .where('id', '=', Number(id))
+  .execute()
 
-  if (isNaN(albumId)) {
-    return <div>Invalid Album id</div>;
-  }
+  const author = await getDB()
+  .selectFrom('authors')
+  .selectAll()
+  .where('id', '=', album[0].author_id)
+  .execute()
 
-  const album = await db
-    .selectFrom("albums")
-    .innerJoin("authors", "authors.id", "albums.author_id")
-    .select([
-      "albums.name",
-      "albums.release_date",
-      "authors.name as author_name",
-    ])
-    .where("albums.id", "=", albumId)
-    .executeTakeFirst();
-
-  // if (album == null)
-  if (album === null || album === undefined) {
-    // throw new Error("Not Found");
-    return <div>Album not found</div>;
-  }
-
-  const songs = await db
-    .selectFrom("songs")
-    .selectAll()
-    .where("album_id", "=", albumId)
-    .execute();
-
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div>
-          {album.name} by {album.author_name}
-        </div>
-        <div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Title</th>
-                <th>Duration</th>
-              </tr>
-            </thead>
-            <tbody>
-              {songs.map((song, i) => (
-                <tr key={song.id}>
-                  <td>{i + 1}</td>
-                  <td>{song.name}</td>
-                  <td>{formatDuration(song.duration)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </main>
+  return(
+    <div>
+      <h1 style={{fontSize: "2rem"}}>{album[0].name}</h1>
+      <h2>autor: <Link href={`/author/${author[0].id}`}>{author[0].name}</Link></h2>
+      <ul>
+        {songs.map(song => (
+          <li key={song.id}>
+            <p>{song.name}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
