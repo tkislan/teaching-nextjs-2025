@@ -1,15 +1,7 @@
 import { getDb } from "@/lib/db";
 import Link from "next/link";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | undefined }>;
-}) {
-  const { q } = await searchParams;
-
-  console.log("q:", q);
-
+export default async function Home() {
   const db = getDb();
 
   const albums = await db
