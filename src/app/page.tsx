@@ -3,11 +3,13 @@ import Link from "next/link";
 import getDB from "@/lib/db";
 
 export default async function Home() {
-  const join = await getDB()
-  .selectFrom('authors')
-  .innerJoin('albums', 'albums.author_id', 'authors.id')
-  .select(['albums.name as album_name', 'authors.name as author_name', 'albums.id as album_id', 'authors.id as author_id'])
-  .execute()
+
+    
+    const join = await getDB()
+    .selectFrom('authors')
+    .innerJoin('albums', 'albums.author_id', 'authors.id')
+    .select(['albums.name as album_name', 'authors.name as author_name', 'albums.id as album_id', 'authors.id as author_id'])
+    .execute()
 
   console.log(join)
 
