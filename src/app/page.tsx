@@ -12,6 +12,7 @@ export default async function Home() {
       "albums.name",
       "albums.release_date",
       "authors.name as author_name",
+      "authors.id as author_id",
     ])
     .execute();
 
@@ -27,7 +28,12 @@ export default async function Home() {
                 <h2 className="text-3xl font-bold">{album.name}</h2>
 
                 <p>ID: {album.id}</p>
-                <p>Author: {album.author_name}</p>
+                <p>
+                  Author:{" "}
+                  <Link href={`/author/${album.author_id}`}>
+                    {album.author_name}
+                  </Link>
+                </p>
                 <p>
                   Release Date: {new Date(album.release_date).toDateString()}
                 </p>
