@@ -2,11 +2,12 @@ import { sql, type Kysely } from "kysely";
 
 export async function up(db: Kysely<unknown>): Promise<void> {
 
-  await sql`DROP TABLE IF EXISTS playlists_songs`.execute(db);
-  await sql`DROP TABLE IF EXISTS playlists`.execute(db);
-  await sql`DROP TABLE IF EXISTS songs`.execute(db);
-  await sql`DROP TABLE IF EXISTS albums`.execute(db);
-  await sql`DROP TABLE IF EXISTS authors`.execute(db);
+  // await sql`DROP TALBE IF EXISTS users`.execute(db);
+  // await sql`DROP TABLE IF EXISTS playlists_songs`.execute(db);
+  // await sql`DROP TABLE IF EXISTS playlists`.execute(db);
+  // await sql`DROP TABLE IF EXISTS songs`.execute(db);
+  // await sql`DROP TABLE IF EXISTS albums`.execute(db);
+  // await sql`DROP TABLE IF EXISTS authors`.execute(db);
 
   await sql`
     CREATE TABLE authors (
@@ -35,11 +36,20 @@ export async function up(db: Kysely<unknown>): Promise<void> {
       FOREIGN KEY (album_id) REFERENCES albums (id) ON DELETE CASCADE
     ) STRICT
   `.execute(db);
+    
+  await sql`
+    CREATE TABLE users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL,
+    name TEXT) STRICT`.execute(db);
 
   await sql`
     CREATE TABLE playlists (
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      name TEXT NOT NULL
+      name TEXT NOT NULL,
+      user_id INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     ) STRICT
   `.execute(db);
 
@@ -52,4 +62,6 @@ export async function up(db: Kysely<unknown>): Promise<void> {
       FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE
     ) STRICT
   `.execute(db);
+
+
 }

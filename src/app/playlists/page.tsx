@@ -2,7 +2,7 @@ import getDB from "@/lib/db";
 import Link from "next/link";
 
 export default async function PlaylistsPage() {
-  const playlists = await getDB().selectFrom("playlists").selectAll().execute();
+  const playlists = await getDB().selectFrom("playlists").selectAll().where('user_id','=',1).execute();
 
   return (
     <main>

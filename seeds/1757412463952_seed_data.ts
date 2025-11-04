@@ -3,6 +3,7 @@ import type { Kysely } from "kysely";
 import { faker } from "@faker-js/faker";
 
 export async function seed(db: Kysely<DB>): Promise<void> {
+  await db.deleteFrom("users").execute();
   await db.deleteFrom("playlists_songs").execute();
   await db.deleteFrom("playlists").execute();
   await db.deleteFrom("songs").execute();
@@ -62,31 +63,45 @@ export async function seed(db: Kysely<DB>): Promise<void> {
         .execute();
     }
   }
+  
+  for(let i = 0; i < 10; i++) {
+    await db
+      .insertInto("users").values({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        name: faker.person.fullName()
+      }).execute()
+  }
+  const users = await db.selectFrom("users").selectAll().execute()
 
-  for (let i = 0; i < 10; i++) {
+  for (const user of users) {
     await db
       .insertInto("playlists")
       .values({
         name: faker.location.city(),
+        user_id: user.id,
       })
       .execute();
   }
 
-  const playlists = await db.selectFrom("playlists").selectAll().execute();
-  const songs = await db.selectFrom("songs").selectAll().execute();
-
+const playlists = await db.selectFrom("playlists").selectAll().execute();
+  const songs = await db.selectFrom("songs").select("id").execute();
+  const songIds = songs.map((song) => song.id);
+ 
   for (const playlist of playlists) {
-    const numSongsInPlaylist = faker.number.int({ min: 5, max: 20 });
-    const selectedSongs = faker.helpers.arrayElements(songs, numSongsInPlaylist);
-
-    for (const song of selectedSongs) {
+    const numSongs = faker.number.int({ min: 1, max: 20 });
+ 
+    for (let i = 0; i < numSongs; i += 1) {
+      console.log("cau")
       await db
         .insertInto("playlists_songs")
         .values({
           playlist_id: playlist.id,
-          song_id: song.id,
+          song_id: faker.helpers.arrayElement(songIds),
         })
         .execute();
     }
   }
+
+
 }
