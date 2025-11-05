@@ -8,6 +8,7 @@ export async function seed(db: Kysely<DB>): Promise<void> {
   await db.deleteFrom("songs").execute();
   await db.deleteFrom("albums").execute();
   await db.deleteFrom("authors").execute();
+  await db.deleteFrom("users").execute();
 
   for (let i = 0; i < 20; i += 1) {
     const numBioParagraphs = faker.number.int({ min: 0, max: 5 });
@@ -70,15 +71,44 @@ export async function seed(db: Kysely<DB>): Promise<void> {
     }
   }
 
-  const numPlaylists = 10;
+  await db
+    .insertInto("users")
+    .values({
+      id: 1,
+      email: "test@test.com",
+      password: "test123",
+      name: "Test User",
+    })
+    .execute();
 
-  for (let i = 0; i < numPlaylists; i += 1) {
+  for (let i = 0; i < 10; i += 1) {
     await db
-      .insertInto("playlists")
+      .insertInto("users")
       .values({
-        name: faker.lorem.words({ min: 1, max: 3 }),
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        name: faker.person.fullName(),
       })
       .execute();
+  }
+
+  const users = await db.selectFrom("users").selectAll().execute();
+
+  for (const user of users) {
+    const numPlaylists = faker.number.int({
+      min: user.id === 1 ? 2 : 0,
+      max: 10,
+    });
+
+    for (let i = 0; i < numPlaylists; i += 1) {
+      await db
+        .insertInto("playlists")
+        .values({
+          name: faker.lorem.words({ min: 1, max: 3 }),
+          user_id: user.id,
+        })
+        .execute();
+    }
   }
 
   const playlists = await db.selectFrom("playlists").selectAll().execute();
@@ -88,12 +118,17 @@ export async function seed(db: Kysely<DB>): Promise<void> {
   for (const playlist of playlists) {
     const numSongs = faker.number.int({ min: 1, max: 20 });
 
-    for (let i = 0; i < numSongs; i += 1) {
+    const randomSongIds = faker.helpers.arrayElements(songIds, {
+      min: 0,
+      max: Math.min(numSongs, songIds.length),
+    });
+
+    for (const songId of randomSongIds) {
       await db
         .insertInto("playlists_songs")
         .values({
           playlist_id: playlist.id,
-          song_id: faker.helpers.arrayElement(songIds),
+          song_id: songId,
         })
         .execute();
     }
