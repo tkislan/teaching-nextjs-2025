@@ -30,7 +30,7 @@ export function NavBar() {
                 <Link
                     href={{
                         pathname: "/search",
-                        query: searchLinkQuery,
+                        query: searchLinkQuery
                     }}
                     className="btn btn-ghost text-xl"
                 >

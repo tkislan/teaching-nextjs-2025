@@ -1,25 +1,16 @@
-"use client"
+"use client";
 
 import Link from "next/link";
-import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
-import { GET } from '@/app/api/albums/route';
+import { GET } from "@/app/api/albums/route";
+import { useApi } from "@/lib/utils/useApi";
 
-type Data = Awaited<ReturnType<typeof GET>>
+type Albums = Awaited<ReturnType<typeof GET>>;
 
 export default function Home() {
-    const [albums, setAlbums] = useState<Data>();
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        api.get("/api/albums")
-            .then(({ data }) => setAlbums(data))
-            .finally(() => setIsLoading(false));
-    }, []);
+    const { data: albums, isLoading } = useApi<Albums>("/api/albums");
 
     return (
-        <div
-            className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+        <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
             <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
                 <p className="text-4xl font-bold">Spotify</p>
                 {isLoading && <p>Loading...</p>}
@@ -38,9 +29,7 @@ export default function Home() {
                                         {album.author_name}
                                     </Link>
                                 </p>
-                                <p>
-                                    Release Date: {new Date(album.release_date).toDateString()}
-                                </p>
+                                <p>Release Date: {new Date(album.release_date).toDateString()}</p>
                                 <div className="mt-6">
                                     <Link
                                         className="btn btn-primary btn-block"

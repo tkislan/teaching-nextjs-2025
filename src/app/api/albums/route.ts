@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from '@/lib/db';
+import { getDb } from "@/lib/db";
 
 export async function GET() {
     const albums = await getDb()
@@ -10,7 +10,7 @@ export async function GET() {
             "albums.name",
             "albums.release_date",
             "authors.name as author_name",
-            "authors.id as author_id",
+            "authors.id as author_id"
         ])
         .execute();
 
