@@ -14,7 +14,7 @@ export function useApi<T>(url: string): HookResult<T> {
         api.get(url)
             .then(({ data }) => setData(data))
             .finally(() => setIsLoading(false));
-    }, []);
+    }, [url]);
 
     return { data, isLoading };
 }
