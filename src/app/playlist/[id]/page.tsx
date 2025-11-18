@@ -1,4 +1,5 @@
 import getDB from "@/lib/db";
+import { RemoveSongButton } from "./removePlaylistSong";
 
 export default async function PlaylistDetail({
   params,
@@ -38,6 +39,11 @@ export default async function PlaylistDetail({
         {songs.map((song) => (
           <li key={song.id}>
             <p>{song.name}</p>
+            <RemoveSongButton
+              playlistId={Number(id)}
+              songId={song.id}
+            ></RemoveSongButton>
+            <br />
           </li>
         ))}
       </ul>
