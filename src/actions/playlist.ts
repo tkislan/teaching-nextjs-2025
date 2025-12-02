@@ -24,12 +24,19 @@ export async function removePlaylist(playlistId:number) {
 }
 
 export async function addSongToPlaylist(
-  notUsedPlaylistId:number,
+  playlistId:number,
   songId:number
 ) {
-  console.log("adding song to playlist", songId);
+  console.log("adding song to playlist", playlistId, songId);
 
   const db = await getDB();
-  const playlist = await db.selectFrom("playlists").selectAll().where("user_id","=",1).execute();
-  const playlistId = playlist.id;
+  await db
+    .insertInto("playlists_songs")
+    .values({
+      playlist_id: playlistId,
+      song_id: songId,
+    })
+    .execute();
+  
+  revalidatePath(`/playlist/${playlistId}`);
 }
