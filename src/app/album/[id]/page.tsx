@@ -37,7 +37,7 @@ export default async function AlbumDetail({
         {songs.map((song) => (
           <li key={song.id}>
             <p>{song.name}</p>
-            <AddToplaylist playlistId={6} songId={song.id}></AddToplaylist>
+            <AddToplaylist playlistId={5} songId={song.id}></AddToplaylist>
           </li>
         ))}
       </ul>
