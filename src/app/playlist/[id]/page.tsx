@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import Link from "next/link";
+import { RemovePlaylistSongButton } from "./RemovePlaylistSongButton";
 
 function formatDuration(duration: number): string {
   const minutes = Math.floor(duration / 60);
@@ -33,13 +34,15 @@ export default async function PlaylistPage({
     return <div>Playlist not found</div>;
   }
 
-  const songs = await db
+  const playlist_songs = await db
     .selectFrom("playlists_songs")
     .innerJoin("songs", "playlists_songs.song_id", "songs.id")
     .innerJoin("albums", "songs.album_id", "albums.id")
     .innerJoin("authors", "albums.author_id", "authors.id")
     .select([
-      "songs.id",
+      "playlists_songs.id",
+      "playlists_songs.playlist_id",
+      "songs.id as song_id",
       "songs.name",
       "songs.duration",
       "songs.album_id",
@@ -63,10 +66,11 @@ export default async function PlaylistPage({
                 <th>Album</th>
                 <th>Author</th>
                 <th>Duration</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {songs.map((song, i) => (
+              {playlist_songs.map((song, i) => (
                 <tr key={song.id}>
                   <td>{i + 1}</td>
                   <td>{song.name}</td>
@@ -81,6 +85,13 @@ export default async function PlaylistPage({
                     </Link>
                   </td>
                   <td>{formatDuration(song.duration)}</td>
+                  <td>
+                    <RemovePlaylistSongButton
+                      id={song.id}
+                      playlistId={song.playlist_id}
+                      songId={song.song_id}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
