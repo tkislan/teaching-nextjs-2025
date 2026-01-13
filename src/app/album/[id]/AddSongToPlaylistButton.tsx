@@ -12,7 +12,9 @@ export function AddSongToPlaylistButton(props: {
   return (
     <details className="dropdown" name="add-song-to-playlist" ref={detailsRef}>
       <summary className="btn btn-xs m-1">Add</summary>
+
       <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+        <div className="p-1">Pick your playlist</div>
         {props.playlists.map((playlist) => (
           <li key={playlist.id}>
             <button

@@ -58,10 +58,13 @@ export async function updatePlaylist(formData: FormData) {
 
   const db = getDb();
 
-  await db.updateTable("playlists").set({ name: playlistNameStr }).where("id", "=", playlistIdInt).execute();
+  await db
+    .updateTable("playlists")
+    .set({ name: playlistNameStr })
+    .where("id", "=", playlistIdInt)
+    .execute();
 
   revalidatePath(`/playlist/${playlistIdInt}`);
-  redirect(`/playlist/${playlistIdInt}`);
 }
 
 export async function addSongToPlaylist(playlistId: number, songId: number) {
