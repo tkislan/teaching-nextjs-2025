@@ -1,23 +1,29 @@
-import getDB from "@/lib/db";
+import getDb from "@/lib/db";
 import Link from "next/link";
-import { RemovePlaylistButton } from "./removePlaylist";
+import CreatePlaylistPage from "./new/page";
 
 export default async function PlaylistsPage() {
-  const playlists = await getDB().selectFrom("playlists").selectAll().execute();
+  const db = getDb();
+
+  const playlists = await db
+    .selectFrom("playlists")
+    .selectAll()
+    .where("user_id", "=", 1)
+    .execute();
 
   return (
-    <main>
-      <h1>Playlists</h1>
-      <ul>
-        {playlists.map((playlist) => (
-          <li className="underline" key={playlist.id}>
-            <Link href={`/playlist/${playlist.id}`}>{playlist.name}</Link>
-            <RemovePlaylistButton
-              playlistId={playlist.id}
-            ></RemovePlaylistButton>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <p className="text-2xl font-bold">Playlists</p>
+        <CreatePlaylistPage />
+        <ul>
+          {playlists.map((playlist) => (
+            <li className="list-disc" key={playlist.id}>
+              <Link href={`/playlist/${playlist.id}`}>{playlist.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </main>
+    </div>
   );
 }

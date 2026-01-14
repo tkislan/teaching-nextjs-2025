@@ -2,15 +2,17 @@
 
 import { removeSongFromPlaylist } from "@/actions/playlist";
 
-export function RemoveSongButton(props: {
+export function RemovePlaylistSongButton(props: {
+  id: number;
   playlistId: number;
   songId: number;
 }) {
   return (
     <button
-      onClick={(e) => {
-        console.log("remove");
-        removeSongFromPlaylist(props.playlistId, props.songId);
+      className="btn btn-xs"
+      onClick={() => {
+        console.log("Remove");
+        removeSongFromPlaylist(props.id, props.playlistId, props.songId);
       }}
     >
       Remove

@@ -1,35 +1,76 @@
-"use server"
-import getDB from "@/lib/db";
+"use server";
+
+import getDb from "@/lib/db";
 import { revalidatePath } from "next/cache";
-export async function removeSongFromPlaylist(
-  playlistId:number,
-  songId:number
-) {
-  console.log("removing song from playlist", playlistId, songId);
+import { redirect } from "next/navigation";
 
-  const db = await getDB();
+export async function createPlaylist(formData: FormData) {
+  const playlistName = formData.get("playlistName");
+
+  if (playlistName == null) {
+    throw new Error("Playlist name missing");
+  }
+
+  const playlistNameStr = playlistName.toString();
+
+  if (playlistNameStr === "") {
+    throw new Error("Playlist name cannot be empty");
+  }
+
+  const db = getDb();
+
+  const newPlaylist = await db
+    .insertInto("playlists")
+    .values({
+      name: playlistNameStr,
+      user_id: 1,
+    })
+    .returningAll()
+    .executeTakeFirstOrThrow();
+
+  redirect(`/playlist/${newPlaylist.id}`);
+}
+
+export async function updatePlaylist(formData: FormData) {
+  const playlistName = formData.get("playlistName");
+
+  if (playlistName == null) {
+    throw new Error("Playlist name missing");
+  }
+
+  const playlistNameStr = playlistName.toString();
+
+  if (playlistNameStr === "") {
+    throw new Error("Playlist name cannot be empty");
+  }
+
+  const playlistId = formData.get("playlistId");
+
+  if (playlistId == null) {
+    throw new Error("Playlist id missing");
+  }
+
+  const playlistIdInt = parseInt(playlistId.toString());
+
+  if (isNaN(playlistIdInt)) {
+    throw new Error("Invalid playlist id");
+  }
+
+  const db = getDb();
+
   await db
-    .deleteFrom("playlists_songs")
-    .where("playlist_id", "=", playlistId)
-    .where("song_id", "=", songId)
+    .updateTable("playlists")
+    .set({ name: playlistNameStr })
+    .where("id", "=", playlistIdInt)
     .execute();
-  
-  revalidatePath(`/playlist/${playlistId}`);
+
+  revalidatePath(`/playlist/${playlistIdInt}`);
+  redirect(`/playlist/${playlistIdInt}`);
 }
 
-export async function removePlaylist(playlistId:number) {
-  const db = await getDB()
-  await db.deleteFrom("playlists").where("id","=",playlistId) .execute();
-  revalidatePath(`/playlist`)
-}
+export async function addSongToPlaylist(playlistId: number, songId: number) {
+  const db = getDb();
 
-export async function addSongToPlaylist(
-  playlistId:number,
-  songId:number
-) {
-  console.log("adding song to playlist", playlistId, songId);
-
-  const db = await getDB();
   await db
     .insertInto("playlists_songs")
     .values({
@@ -37,6 +78,24 @@ export async function addSongToPlaylist(
       song_id: songId,
     })
     .execute();
-  
-  revalidatePath(`/playlist/${playlistId}`);
+
+  revalidatePath("/");
+}
+
+export async function removeSongFromPlaylist(
+  id: number,
+  playlistId: number,
+  songId: number
+) {
+  console.log(`Removing song ${songId} from playlist ${playlistId}`);
+  const db = getDb();
+
+  await db
+    .deleteFrom("playlists_songs")
+    .where("id", "=", id)
+    .where("playlist_id", "=", playlistId)
+    .where("song_id", "=", songId)
+    .execute();
+
+  revalidatePath("/");
 }
