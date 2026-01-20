@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker";
 import type { Kysely } from "kysely";
 
 export async function seed(db: Kysely<DB>): Promise<void> {
+  await db.deleteFrom("user_liked_songs").execute();
   await db.deleteFrom("playlists_songs").execute();
   await db.deleteFrom("playlists").execute();
   await db.deleteFrom("songs").execute();
@@ -128,6 +129,25 @@ export async function seed(db: Kysely<DB>): Promise<void> {
         .insertInto("playlists_songs")
         .values({
           playlist_id: playlist.id,
+          song_id: songId,
+        })
+        .execute();
+    }
+  }
+
+  // Seed user liked songs (0-20 random songs per user)
+  for (const user of users) {
+    const numLikedSongs = faker.number.int({ min: 0, max: 20 });
+    const randomSongIds = faker.helpers.arrayElements(songIds, {
+      min: 0,
+      max: Math.min(numLikedSongs, songIds.length),
+    });
+
+    for (const songId of randomSongIds) {
+      await db
+        .insertInto("user_liked_songs")
+        .values({
+          user_id: user.id,
           song_id: songId,
         })
         .execute();

@@ -1,6 +1,7 @@
 import { getDb } from "@/lib/db";
 import Link from "next/link";
 import { AddSongToPlaylistButton } from "./AddSongToPlaylistButton";
+import { LikeSongButton } from "@/components/LikeSongButton";
 
 function formatDuration(duration: number): string {
   const minutes = Math.floor(duration / 60);
@@ -56,6 +57,14 @@ export default async function AlbumDetail({
     .where("user_id", "=", 1)
     .execute();
 
+  const likedSongs = await db
+    .selectFrom("user_liked_songs")
+    .select("song_id")
+    .where("user_id", "=", 1)
+    .execute();
+
+  const likedSongIds = new Set(likedSongs.map((ls) => ls.song_id));
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -80,6 +89,10 @@ export default async function AlbumDetail({
                   <td>{song.name}</td>
                   <td>{formatDuration(song.duration)}</td>
                   <td>
+                    <LikeSongButton
+                      songId={song.id}
+                      isLiked={likedSongIds.has(song.id)}
+                    />
                     <AddSongToPlaylistButton
                       playlists={playlists}
                       songId={song.id}

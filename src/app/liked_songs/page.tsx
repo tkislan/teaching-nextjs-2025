@@ -1,8 +1,6 @@
 import { getDb } from "@/lib/db";
 import Link from "next/link";
-import { RemovePlaylistSongButton } from "./RemovePlaylistSongButton";
-import { EditPlaylistButton } from "./EditPlaylistButton";
-import { LikeSongButton } from "@/components/LikeSongButton";
+import { RemoveLikeButton } from "./RemoveLikeButton";
 
 function formatDuration(duration: number): string {
   const minutes = Math.floor(duration / 60);
@@ -11,39 +9,16 @@ function formatDuration(duration: number): string {
   return `${minutes}` + ":" + `${seconds}`.padStart(2, "0");
 }
 
-export default async function PlaylistPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-
-  const playlistId = parseInt(id);
-
-  if (isNaN(playlistId)) {
-    return <div>Invalid Playlist id</div>;
-  }
-
+export default async function LikedSongsPage() {
   const db = getDb();
 
-  const playlist = await db
-    .selectFrom("playlists")
-    .selectAll()
-    .where("id", "=", playlistId)
-    .executeTakeFirst();
-
-  if (playlist == null) {
-    return <div>Playlist not found</div>;
-  }
-
-  const playlist_songs = await db
-    .selectFrom("playlists_songs")
-    .innerJoin("songs", "playlists_songs.song_id", "songs.id")
+  const likedSongs = await db
+    .selectFrom("user_liked_songs")
+    .innerJoin("songs", "user_liked_songs.song_id", "songs.id")
     .innerJoin("albums", "songs.album_id", "albums.id")
     .innerJoin("authors", "albums.author_id", "authors.id")
     .select([
-      "playlists_songs.id",
-      "playlists_songs.playlist_id",
+      "user_liked_songs.id",
       "songs.id as song_id",
       "songs.name",
       "songs.duration",
@@ -52,25 +27,13 @@ export default async function PlaylistPage({
       "albums.author_id",
       "authors.name as author_name",
     ])
-    .where("playlists_songs.playlist_id", "=", playlist.id)
+    .where("user_liked_songs.user_id", "=", 1)
     .execute();
-
-  const likedSongs = await db
-    .selectFrom("user_liked_songs")
-    .select("song_id")
-    .where("user_id", "=", 1)
-    .execute();
-
-  const likedSongIds = new Set(likedSongs.map((ls) => ls.song_id));
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <p className="text-2xl font-bold">Playlist: {playlist.name}</p>
-        <EditPlaylistButton
-          playlistId={playlist.id}
-          playlistName={playlist.name}
-        />
+        <p className="text-2xl font-bold">Liked Songs</p>
         <div>
           <table className="table">
             <thead>
@@ -84,7 +47,7 @@ export default async function PlaylistPage({
               </tr>
             </thead>
             <tbody>
-              {playlist_songs.map((song, i) => (
+              {likedSongs.map((song, i) => (
                 <tr key={song.id}>
                   <td>{i + 1}</td>
                   <td>{song.name}</td>
@@ -100,15 +63,7 @@ export default async function PlaylistPage({
                   </td>
                   <td>{formatDuration(song.duration)}</td>
                   <td>
-                    <LikeSongButton
-                      songId={song.song_id}
-                      isLiked={likedSongIds.has(song.song_id)}
-                    />
-                    <RemovePlaylistSongButton
-                      id={song.id}
-                      playlistId={song.playlist_id}
-                      songId={song.song_id}
-                    />
+                    <RemoveLikeButton songId={song.song_id} />
                   </td>
                 </tr>
               ))}
