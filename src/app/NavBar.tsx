@@ -45,15 +45,46 @@ export function NavBar() {
         >
           Search
         </Link>
-        <Link href="/playlists" className="btn btn-ghost text-xl">
-          Playlists
-        </Link>
-        <Link href="/liked_songs" className="btn btn-ghost text-xl">
-          Liked Songs
-        </Link>
-        <Link href="/history" className="btn btn-ghost text-xl">
-          History
-        </Link>
+        <div className="dropdown dropdown-end">
+          <div
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost btn-circle"
+            aria-label="Navigation menu"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h7"
+              />
+            </svg>
+          </div>
+          <ul
+            tabIndex={-1}
+            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+          >
+            <li>
+              <Link href="/playlists">Playlists</Link>
+            </li>
+            <li>
+              <Link href="/liked_songs">Liked Songs</Link>
+            </li>
+            <li>
+              <Link href="/following_authors">Following Authors</Link>
+            </li>
+            <li>
+              <Link href="/history">History</Link>
+            </li>
+          </ul>
+        </div>
         <Link href="/login" className="btn btn-ghost text-xl">
           Login
         </Link>

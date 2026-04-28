@@ -4,6 +4,7 @@ import type { Kysely } from "kysely";
 
 export async function seed(db: Kysely<DB>): Promise<void> {
   await db.deleteFrom("playback_events").execute();
+  await db.deleteFrom("user_followed_authors").execute();
   await db.deleteFrom("user_liked_songs").execute();
   await db.deleteFrom("playlists_songs").execute();
   await db.deleteFrom("playlists").execute();
@@ -136,7 +137,8 @@ export async function seed(db: Kysely<DB>): Promise<void> {
     }
   }
 
-  // Seed user liked songs (0-20 random songs per user)
+  const authorIds = authors.map((a) => a.id);
+
   for (const user of users) {
     const numLikedSongs = faker.number.int({ min: 0, max: 20 });
     const randomSongIds = faker.helpers.arrayElements(songIds, {
@@ -155,7 +157,26 @@ export async function seed(db: Kysely<DB>): Promise<void> {
     }
   }
 
-  // Seed playback events (5-30 random events per user)
+  for (const user of users) {
+    const numFollowed = faker.number.int({
+      min: 0,
+      max: Math.min(10, authorIds.length),
+    });
+
+    const pickedAuthorIds = faker.helpers.shuffle([...authorIds]).slice(0, numFollowed);
+
+    for (const authorId of pickedAuthorIds) {
+      await db
+        .insertInto("user_followed_authors")
+        .values({
+          user_id: user.id,
+          author_id: authorId,
+          created_at: faker.date.past().getTime(),
+        })
+        .execute();
+    }
+  }
+
   const eventNames = ["playback_start", "playback_end", "playback_skip"] as const;
 
   for (const user of users) {
